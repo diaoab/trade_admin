@@ -1,0 +1,5 @@
+[tool.pytest.ini_options]
+# Permet aux tests d'importer "backend_path", "ui.xxx" et "app_pages" comme
+# le fait l'application ; backend_path ajoute ensuite le dossier du backend.
+pythonpath = ["."]
+testpaths = ["tests"]

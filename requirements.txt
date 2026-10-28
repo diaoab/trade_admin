@@ -1,0 +1,5 @@
+# Interface Streamlit. Le coeur metier (services/, config.py) et ses
+# dependances viennent du backend, dossier voisin trade_back.
+-r ../trade_back/requirements.txt
+streamlit>=1.50
+plotly>=6.0
