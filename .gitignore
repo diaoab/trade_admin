@@ -1,6 +1,7 @@
-venv/
-.venv/
-__pycache__/
-*.py[cod]
-.pytest_cache/
+node_modules
+dist
+.env
+.env.local
+*.log
 .DS_Store
+*.tsbuildinfo

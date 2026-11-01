@@ -2,17 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "advisor",
-      "runtimeExecutable": "../trade_back/.venv/bin/streamlit",
-      "runtimeArgs": [
-        "run",
-        "app.py",
-        "--server.port",
-        "8501",
-        "--server.headless",
-        "true"
-      ],
-      "port": 8501
+      "name": "admin-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5176
+    },
+    {
+      "name": "trade-api",
+      "runtimeExecutable": "../trade_back/.venv/bin/python",
+      "runtimeArgs": ["-m", "uvicorn", "api.main:app", "--app-dir", "../trade_back", "--port", "8000"],
+      "port": 8000
     }
   ]
 }
