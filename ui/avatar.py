@@ -12,7 +12,7 @@ import json
 
 def avatar_html(sentences, theme):
     """Construit le HTML autonome de l'assistant (a passer a
-    st.components.v1.html). `sentences` vient de services.narration."""
+    st.components.v1.html). `sentences` vient de api.services.engine.narration."""
 
     # "</" echappe : le texte est injecte dans une balise <script>, qu'un
     # "</script>" present dans une phrase refermerait.

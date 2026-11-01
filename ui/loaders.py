@@ -6,17 +6,17 @@ les importer sans dependre du script d'entree.
 
 import streamlit as st
 
-from config import DEFAULT_WEIGHTS
-from services.analysis import (
+from api.config.constants import DEFAULT_WEIGHTS
+from api.services.engine.analysis import (
     analyse_session,
     latest_sessions,
     next_dividend_cutoff,
     session_changes
 )
-from services.backtest import replay_signals
-from services.predictor import load_model_metadata
-from services.indicators import calculate_indicators
-from services.market_data import get_structures, load_structure
+from api.services.engine.backtest import replay_signals
+from api.services.engine.predictor import load_model_metadata
+from api.services.engine.indicators import calculate_indicators
+from api.services.engine.market_data import get_structures, load_structure
 
 
 @st.cache_data(show_spinner=False)
@@ -41,7 +41,7 @@ def load_prepared(symbol, adjust_dividends=True):
 @st.cache_data(show_spinner="Rejeu des signaux sur l'historique…")
 def load_signal_backtest(symbols):
     """Rejeu des signaux techniques sur les structures du catalogue (cf.
-    services.backtest.replay_signals) : une ligne par seance.
+    api.services.engine.backtest.replay_signals) : une ligne par seance.
 
     Mis en cache : le rejeu appelle le moteur plusieurs fois par seance. Les
     tableaux de synthese (par horizon, frais deduits) se recalculent a la

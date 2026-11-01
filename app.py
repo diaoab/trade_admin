@@ -1,7 +1,7 @@
 import backend_path  # noqa: F401  (doit preceder config et services)
 import streamlit as st
 
-from config import (
+from api.config.constants import (
     DEFAULT_ADJUST_DIVIDENDS,
     DEFAULT_ROUND_TRIP_FEE,
     DEFAULT_WEIGHTS,
@@ -11,12 +11,12 @@ from ui.loaders import (
     load_prepared,
     load_signal_backtest
 )
-from services.market_data import (
+from api.services.engine.market_data import (
     get_structures,
     match_structure_name,
     save_uploaded_structure
 )
-from services.preferences import load_preferences
+from api.services.engine.preferences import load_preferences
 from ui.themes import DEFAULT_THEME, THEMES, theme_css
 
 
@@ -35,7 +35,7 @@ st.set_page_config(
 # page (cf. app_pages/), donc c'est le seul endroit garanti pour les poser
 # avant que app_pages/parametres.py -- qui possede les vrais widgets -- ait
 # eu l'occasion de tourner au moins une fois dans la session. On part des
-# reglages enregistres sur disque (cf. services/preferences.py) : sans ca,
+# reglages enregistres sur disque (cf. api/services/engine/preferences.py) : sans ca,
 # un simple rechargement de page (nouvelle session_state) reviendrait aux
 # reglages d'usine malgre un "Enregistrer" precedent.
 preferences = load_preferences()

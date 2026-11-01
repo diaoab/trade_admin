@@ -4,20 +4,20 @@ import streamlit as st
 import streamlit.components.v1 as components
 from plotly.subplots import make_subplots
 
-from config import DEFAULT_WEIGHTS
-from services.assistant_chat import (
+from api.config.constants import DEFAULT_WEIGHTS
+from api.services.engine.assistant_chat import (
     AssistantUnavailable,
     build_context,
     stream_answer
 )
 from ui.avatar import avatar_html
-from services.analysis import analyse_session, relative_performance
+from api.services.engine.analysis import analyse_session, relative_performance
 from ui.loaders import load_prepared
-from services.market_data import cutoff_date, get_structures
-from services.narration import build_narration
-from services.predictor import load_model_metadata
-from services.prediction_log import log_prediction
-from services.targets import FUTURE_HORIZON_DAYS
+from api.services.engine.market_data import cutoff_date, get_structures
+from api.services.engine.narration import build_narration
+from api.services.engine.predictor import load_model_metadata
+from api.services.engine.prediction_log import log_prediction
+from api.services.engine.targets import FUTURE_HORIZON_DAYS
 from ui.themes import CHART_COLORS, THEMES
 
 
@@ -174,7 +174,7 @@ upcoming_dividends = (
     else []
 )
 
-# Repris par l'assistant vocal dans son resume (cf. services.narration).
+# Repris par l'assistant vocal dans son resume (cf. api.services.engine.narration).
 dividend_notice = None
 
 if upcoming_dividends:
@@ -275,7 +275,7 @@ def _delta(column):
 
 
 # Cours reellement cote : Close_Raw existe des que l'historique a ete ajuste
-# d'un dividende (cf. services.market_data.adjust_for_dividends).
+# d'un dividende (cf. api.services.engine.market_data.adjust_for_dividends).
 quoted_close = "Close_Raw" if "Close_Raw" in clean_df.columns else "Close"
 
 
@@ -375,7 +375,7 @@ with st.container(border=True):
     if model_metadata is None:
 
         st.caption(
-            "Pas encore entraîné : lance python -m training.train."
+            "Pas encore entraîné : lance python -m api.training.train."
         )
 
     else:
@@ -804,7 +804,7 @@ if analyze_button:
 
     # Trace de cette analyse, avant que le resultat reel ne soit connu : seule
     # base possible pour mesurer plus tard une performance en conditions
-    # reelles (cf. services/prediction_log.py).
+    # reelles (cf. api/services/engine/prediction_log.py).
     log_prediction(
         symbol=selected_symbol,
         structure_name=structures[selected_symbol]["name"],
@@ -908,7 +908,10 @@ if (
                                 analysed_session,
                                 result,
                                 ml_result,
-                                dividend_notice
+                                dividend_notice,
+                                (model_metadata or {}).get(
+                                    "target_horizon_days"
+                                )
                             ),
                             chat["history"]
                         )
@@ -983,7 +986,7 @@ if (
 
         st.warning(
             "Modèle ML indisponible : la décision repose sur l'analyse "
-            "technique seule. Lance `python -m training.train` pour "
+            "technique seule. Lance `python -m api.training.train` pour "
             "l'entraîner.",
             icon=":material/warning:"
         )

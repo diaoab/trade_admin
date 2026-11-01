@@ -1,8 +1,8 @@
 # Financial AI Advisor — interface Streamlit
 
 Interface locale d'analyse : cours, décision, marché, portefeuille,
-dividendes, journal et paramètres. Le cœur métier (`config.py`,
-`services/`) n'est pas dupliqué ici : il est importé depuis le backend,
+dividendes, journal et paramètres. Le cœur métier (`api/config/constants.py`,
+`api/services/engine/`) n'est pas dupliqué ici : il est importé depuis le backend,
 dossier voisin `../trade_back` (ou celui indiqué par `TRADE_BACK_DIR`), via
 `backend_path.py`. Données, modèle et résultats sont donc ceux du backend.
 
@@ -31,7 +31,7 @@ Tests (dont le test de fumée qui lance réellement chaque page) :
 ```
 app.py              Point d'entrée Streamlit : marque, navigation,
                       import et sélection de structure
-backend_path.py     Rend importables config et services/ du backend
+backend_path.py     Rend importable le paquet api du backend
 app_pages/          Analyse, Marché, Portefeuille, Dividendes, Journal,
                       Paramètres
 ui/
