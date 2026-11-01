@@ -1,6 +1,6 @@
 import streamlit as st
 
-from api.services.engine.analysis import CUTOFF_ALERT_DAYS
+from core.engine.analysis import CUTOFF_ALERT_DAYS
 from ui.loaders import market_overview
 
 

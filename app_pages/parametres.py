@@ -1,19 +1,19 @@
 import pandas as pd
 import streamlit as st
 
-from api.config.constants import INDICATOR_OPTIONS
+from core.constants import INDICATOR_OPTIONS
 from ui.loaders import (
     load_prepared,
     load_signal_backtest
 )
-from api.services.engine.market_data import (
+from core.engine.market_data import (
     clean_dividends,
     cutoff_date,
     get_structures,
     set_dividends
 )
-from api.services.engine.preferences import save_preferences
-from api.services.engine.trading_calendar import (
+from core.engine.preferences import save_preferences
+from core.engine.trading_calendar import (
     computed_holidays,
     load_extra_holidays,
     save_extra_holidays

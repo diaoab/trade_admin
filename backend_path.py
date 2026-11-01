@@ -1,8 +1,8 @@
-"""Rend importable le paquet `api` du backend (dossier trade_back).
+"""Rend importable le paquet `core` du backend (dossier trade_back).
 
 L'interface Streamlit ne duplique pas le coeur metier : elle l'importe
 depuis le dossier du backend, voisin par defaut, ou celui de TRADE_BACK_DIR.
-Donnees, modele et resultats sont donc ceux du backend (cf. api/config/constants.py).
+Donnees, modele et resultats sont donc ceux du backend (cf. core/constants.py).
 """
 
 import os
@@ -15,7 +15,7 @@ BACK_DIR = Path(os.environ.get(
     Path(__file__).resolve().parent.parent / "trade_back"
 )).resolve()
 
-if not (BACK_DIR / "api" / "config" / "constants.py").is_file():
+if not (BACK_DIR / "core" / "constants.py").is_file():
     raise RuntimeError(
         f"Backend introuvable dans {BACK_DIR} : definir TRADE_BACK_DIR."
     )

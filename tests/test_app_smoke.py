@@ -13,7 +13,7 @@ import pandas as pd
 import pytest
 from streamlit.testing.v1 import AppTest
 
-from api.services.engine import (
+from core.engine import (
     portfolio,
     market_data,
     prediction_log,
