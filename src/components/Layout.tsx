@@ -6,7 +6,9 @@ import ErrorBoundary from './ErrorBoundary';
 import logo from '@/logo.svg';
 import { useAuth } from '@/auth/store';
 import { api } from '@/api/client';
+import { nomCompte } from '@/api/types';
 import { ROLES } from '@/lib/labels';
+import ChangerMotDePasseModal from '@/auth/ChangerMotDePasseModal';
 import { initiales } from '@/lib/format';
 import { MOBILE, useMediaQuery } from '@/lib/hooks';
 
@@ -17,7 +19,7 @@ const NAV: Entree[] = [
   { section: 'Pilotage' },
   { to: '/', label: 'Tableau de bord', icon: 'layout-dashboard', sub: "Vue d'ensemble du service" },
   { section: 'Comptes' },
-  { to: '/utilisateurs', label: 'Utilisateurs', icon: 'users', sub: 'Comptes, offre et rôle' },
+  { to: '/utilisateurs', label: 'Utilisateurs', icon: 'users', sub: 'Comptes, offre, rôle et statut' },
   { to: '/paiements', label: 'Paiements', icon: 'credit-card', sub: 'Factures PayDunya' },
   { section: 'Données & modèle' },
   { to: '/historiques', label: 'Historiques', icon: 'database', sub: 'Cours des titres, import et cours du jour' },
@@ -36,6 +38,7 @@ export default function Layout() {
   const { utilisateur, refreshToken, clear } = useAuth();
   const [ouvert, setOuvert] = useState(false);
   const [compte, setCompte] = useState(false);
+  const [motDePasse, setMotDePasse] = useState(false);
   const zoneCompte = useRef<HTMLDivElement>(null);
   // Le tiroir n'existe que sur mobile : au-delà, le menu est toujours affiché
   const mobile = useMediaQuery(MOBILE);
@@ -163,7 +166,7 @@ export default function Layout() {
               >
                 <span className="ava">{initiales(utilisateur?.email)}</span>
                 <span className="user-info">
-                  <span className="user-name">{utilisateur?.email}</span>
+                  <span className="user-name">{utilisateur ? nomCompte(utilisateur) : ''}</span>
                   <span className="user-role">{ROLES[utilisateur?.role ?? '']?.label ?? utilisateur?.role}</span>
                 </span>
                 <Icon name="chevron-right" size={14} className="compte-chevron" />
@@ -173,10 +176,21 @@ export default function Layout() {
                   <div className="compte-entete">
                     <span className="ava">{initiales(utilisateur?.email)}</span>
                     <span className="user-info">
-                      <span className="user-name">{utilisateur?.email}</span>
+                      <span className="user-name">{utilisateur ? nomCompte(utilisateur) : ''}</span>
                       <span className="user-role">{ROLES[utilisateur?.role ?? '']?.label}</span>
                     </span>
                   </div>
+                  <button
+                    role="menuitem"
+                    className="compte-item"
+                    onClick={() => {
+                      setCompte(false);
+                      setMotDePasse(true);
+                    }}
+                  >
+                    <Icon name="lock" size={16} />
+                    Changer mon mot de passe
+                  </button>
                   <button role="menuitem" className="compte-item danger" onClick={deconnexion}>
                     <Icon name="log-out" size={16} />
                     Déconnexion
@@ -195,6 +209,7 @@ export default function Layout() {
           </ErrorBoundary>
         </div>
       </div>
+      {motDePasse && <ChangerMotDePasseModal onClose={() => setMotDePasse(false)} />}
     </div>
   );
 }

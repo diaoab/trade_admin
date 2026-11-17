@@ -19,7 +19,7 @@ export default function DashboardPage() {
       <div className="stats">
         <Stat icon="users" value={nombre(s.users.total)} label="Comptes" hint={`+${s.users.new_7d} cette semaine · +${s.users.new_30d} sur 30 jours`} onClick={() => navigate('/utilisateurs')} />
         <Stat icon="sparkles" ton="vert" value={nombre(s.users.pro)} label="Comptes Pro" hint={`${s.users.total ? Math.round((s.users.pro / s.users.total) * 100) : 0} % des comptes`} onClick={() => navigate('/utilisateurs?plan=pro')} />
-        <Stat icon="activity" ton="cyan" value={nombre(s.users.active_7d)} label="Connectés (7 jours)" />
+        <Stat icon="activity" ton="cyan" value={nombre(s.users.active_7d)} label="Connectés (7 jours)" hint={s.users.inactive ? `${nombre(s.users.inactive)} compte(s) désactivé(s)` : undefined} onClick={s.users.inactive ? () => navigate('/utilisateurs?status=inactive') : undefined} />
         <Stat icon="coins" ton="orange" value={montant(s.payments.revenue_30d)} label="Encaissé (30 jours)" hint={`${montant(s.payments.revenue_total)} au total`} onClick={() => navigate('/paiements')} />
         <Stat icon="message-circle" ton="violet" value={nombre(s.assistant.today)} label="Questions à l'assistant aujourd'hui" hint={`${nombre(s.assistant.last_7d)} sur 7 jours`} />
         <Stat icon="credit-card" ton="bleu" value={nombre(s.payments.pending)} label="Paiements en attente" hint={`${nombre(s.payments.completed)} payés`} onClick={() => navigate('/paiements?status=pending')} />

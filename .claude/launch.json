@@ -4,14 +4,34 @@
     {
       "name": "admin-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 5176
     },
     {
       "name": "trade-api",
       "runtimeExecutable": "../trade_back/.venv/bin/python",
-      "runtimeArgs": ["-m", "uvicorn", "api.main:app", "--app-dir", "../trade_back", "--port", "8000"],
+      "runtimeArgs": [
+        "-m",
+        "uvicorn",
+        "api.main:app",
+        "--app-dir",
+        "../trade_back",
+        "--port",
+        "8000"
+      ],
       "port": 8000
+    },
+    {
+      "name": "admin-api-8001",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "VITE_API_PROXY_TARGET=http://localhost:8001 exec npx vite --port 5178"
+      ],
+      "port": 5178
     }
   ]
 }

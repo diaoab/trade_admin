@@ -12,6 +12,11 @@ export const PLANS: Record<string, { label: string; ton: Ton }> = {
   pro: { label: 'Pro', ton: 'vert' },
 };
 
+export const STATUTS_COMPTE: Record<string, { label: string; ton: Ton }> = {
+  active: { label: 'Actif', ton: 'vert' },
+  inactive: { label: 'Désactivé', ton: 'rouge' },
+};
+
 /** Statuts des factures PayDunya. */
 export const STATUTS_PAIEMENT: Record<string, { label: string; ton: Ton }> = {
   pending: { label: 'En attente', ton: 'orange' },

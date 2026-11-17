@@ -5,8 +5,11 @@ import type { Plan, Role } from '@/api/types';
 export interface Utilisateur {
   id: number;
   email: string;
+  first_name: string | null;
+  last_name: string | null;
   role: Role;
   plan: Plan;
+  must_change_password: boolean;
 }
 
 interface AuthState {

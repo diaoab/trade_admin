@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Loader } from './components/ui';
 import { useAuth } from './auth/store';
 import LoginPage from './auth/LoginPage';
+import MotDePasseOubliePage from './auth/MotDePasseOubliePage';
 import Layout from './components/Layout';
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const UtilisateursPage = lazy(() => import('./pages/users/UtilisateursPage'));
@@ -21,6 +22,7 @@ export default function App() {
     <Suspense fallback={<Loader />}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/mot-de-passe-oublie" element={<MotDePasseOubliePage />} />
         <Route
           element={
             <Protege>

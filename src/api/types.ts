@@ -24,7 +24,13 @@ export type Plan = 'free' | 'pro';
 export interface Compte {
   id: number;
   email: string;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string | null;
   role: Role;
+  is_active: boolean;
+  /** Admin créé avec un mot de passe provisoire, pas encore changé. */
+  must_change_password: boolean;
   plan: Plan;
   effective_plan: Plan;
   pro_until: string | null;
@@ -47,13 +53,34 @@ export interface CompteDetail extends Compte {
   assistant_questions: number;
 }
 
+/** Champs modifiables d'un compte (PATCH /admin/users/:id) ; null efface le champ. */
+export interface CompteModif {
+  plan?: Plan;
+  role?: Role;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+}
+
+export interface NouvelAdmin {
+  email: string;
+  password: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+}
+
+/** Nom affiché d'un compte : prénom et nom, sinon l'e-mail. */
+export const nomCompte = (u: Pick<Compte, 'email' | 'first_name' | 'last_name'>) =>
+  [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email;
+
 export interface Paiement extends PaiementCompte {
   user_id: number;
   email: string;
 }
 
 export interface Stats {
-  users: { total: number; pro: number; admins: number; new_7d: number; new_30d: number; active_7d: number };
+  users: { total: number; pro: number; admins: number; inactive: number; new_7d: number; new_30d: number; active_7d: number };
   signups: { day: string; count: number }[];
   payments: { completed: number; pending: number; revenue_total: number; revenue_30d: number };
   assistant: { today: number; last_7d: number };

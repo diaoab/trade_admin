@@ -34,7 +34,7 @@ export function ErrorBox({ error }: { error: unknown }) {
   if (!error) return null;
   const message = error instanceof Error ? error.message : String(error);
   return (
-    <div className="alert error">
+    <div className="alert error" role="alert">
       <Icon name="alert-triangle" size={16} />
       <div>{message}</div>
     </div>

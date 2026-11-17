@@ -38,7 +38,9 @@ http.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
     const original = error.config as AxiosRequestConfig & { _retry?: boolean };
-    const estAuth = original?.url?.startsWith('/auth/');
+    // Les routes /auth/ ne rafraîchissent pas la session, sauf le changement de mot de passe,
+    // qui exige un jeton valide (un 401 y signale sinon un mot de passe actuel incorrect)
+    const estAuth = original?.url?.startsWith('/auth/') && original.url !== '/auth/password';
 
     if (error.response?.status === 401 && original && !original._retry && !estAuth) {
       original._retry = true;
@@ -62,7 +64,9 @@ http.interceptors.response.use(
       }
     }
 
-    const corps = error.response?.data as { message?: string; details?: string[] } | undefined;
+    let corps = error.response?.data as { message?: string; details?: string[] } | undefined;
+    // Réponse attendue en fichier (export) : l'erreur JSON arrive elle aussi sous forme de Blob
+    if (corps instanceof Blob) corps = await corps.text().then((t) => JSON.parse(t)).catch(() => undefined);
 
     let message = corps?.message || error.message || 'Erreur inattendue';
     if (corps?.details?.length) message += ` : ${corps.details.join(' · ')}`;
@@ -78,7 +82,21 @@ export const api = {
     (await http.get(url, { params: nettoyer(params) })).data.data as T,
   post: async <T>(url: string, body?: unknown, params?: Record<string, unknown>) =>
     (await http.post(url, body, { params: nettoyer(params) })).data.data as T,
+  put: async <T>(url: string, body?: unknown, config?: AxiosRequestConfig) =>
+    (await http.put(url, body, config)).data.data as T,
   patch: async <T>(url: string, body?: unknown) => (await http.patch(url, body)).data.data as T,
+  delete: async <T>(url: string) => (await http.delete(url)).data.data as T,
+  /** Fichier renvoyé par l'API (export CSV) : téléchargé sous le nom donné par Content-Disposition. */
+  telecharger: async (url: string, params?: Record<string, unknown>, nomParDefaut = 'export') => {
+    const res = await http.get<Blob>(url, { params: nettoyer(params), responseType: 'blob' });
+    const disposition = String(res.headers['content-disposition'] ?? '');
+    const nom = /filename="?([^";]+)"?/.exec(disposition)?.[1] ?? nomParDefaut;
+    const lien = document.createElement('a');
+    lien.href = URL.createObjectURL(res.data);
+    lien.download = nom;
+    lien.click();
+    URL.revokeObjectURL(lien.href);
+  },
   /** Corps brut (classeur .xlsx) : l'API lit le fichier tel quel. */
   fichier: async <T>(url: string, fichier: File, params?: Record<string, unknown>) =>
     (
