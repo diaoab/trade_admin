@@ -70,6 +70,14 @@ export interface NouvelAdmin {
   phone?: string;
 }
 
+/** Compte créé depuis le back-office (POST /admin/users). */
+export interface NouveauCompte extends NouvelAdmin {
+  role: 'user' | 'admin';
+  plan: 'free' | 'pro';
+  /** Mot de passe provisoire : à changer à la première connexion (toujours pour un admin). */
+  must_change_password: boolean;
+}
+
 /** Nom affiché d'un compte : prénom et nom, sinon l'e-mail. */
 export const nomCompte = (u: Pick<Compte, 'email' | 'first_name' | 'last_name'>) =>
   [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email;

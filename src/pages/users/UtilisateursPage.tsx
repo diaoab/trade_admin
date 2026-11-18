@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/api/client';
-import { nomCompte, versPagination, type Compte, type Liste, type NouvelAdmin } from '@/api/types';
+import { nomCompte, versPagination, type Compte, type Liste, type NouvelAdmin, type NouveauCompte } from '@/api/types';
 import { useAuth } from '@/auth/store';
 import Icon from '@/components/Icon';
 import ResponsiveTable from '@/components/ResponsiveTable';
@@ -10,7 +10,7 @@ import { Card, Chips, Empty, ErrorBox, Field, Loader, Modal, Pagination, SearchI
 import { date, dateHeure, nombre } from '@/lib/format';
 import { useFiltres, useInvalider } from '@/lib/hooks';
 import { PLANS, ROLES, STATUTS_COMPTE } from '@/lib/labels';
-import { erreurMotDePasse, REGLE_MDP } from '@/lib/motDePasse';
+import { erreurMotDePasse, LONGUEUR_MIN, REGLE_MDP } from '@/lib/motDePasse';
 
 const OFFRES = [
   { value: '', label: 'Tous' },
@@ -18,12 +18,17 @@ const OFFRES = [
   { value: 'free', label: 'Gratuit' },
 ];
 
-function NouvelAdminModal({ onClose }: { onClose: () => void }) {
+function NouveauCompteModal({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
   const invalider = useInvalider();
-  const [champs, setChamps] = useState<Required<NouvelAdmin>>({ email: '', password: '', first_name: '', last_name: '', phone: '' });
+  const [champs, setChamps] = useState<Required<NouveauCompte>>({
+    email: '', password: '', first_name: '', last_name: '', phone: '',
+    role: 'user', plan: 'free', must_change_password: true,
+  });
   const [erreur, setErreur] = useState<unknown>(null);
   const [envoi, setEnvoi] = useState(false);
+  const admin = champs.role === 'admin';
+  const provisoire = admin || champs.must_change_password;
 
   const champ = (cle: keyof NouvelAdmin) => ({
     value: champs[cle],
@@ -33,12 +38,15 @@ function NouvelAdminModal({ onClose }: { onClose: () => void }) {
   const soumettre = async (e: FormEvent) => {
     e.preventDefault();
     setErreur(null);
-    const invalide = erreurMotDePasse(champs.password);
+    // Admin : majuscule et chiffre exigés ; utilisateur : longueur seule.
+    const invalide = admin
+      ? erreurMotDePasse(champs.password)
+      : champs.password.length < LONGUEUR_MIN ? `Au moins ${LONGUEUR_MIN} caractères.` : null;
     if (invalide) return setErreur(new Error(`Mot de passe : ${invalide.toLowerCase()}`));
     setEnvoi(true);
     try {
-      const u = await api.post<Compte>('/admin/users/admins', champs);
-      toast.success(`Administrateur ${u.email} créé`);
+      const u = await api.post<Compte>('/admin/users', { ...champs, must_change_password: provisoire });
+      toast.success(`${admin ? 'Administrateur' : 'Compte'} ${u.email} créé`);
       invalider('users', 'stats');
       navigate(`/utilisateurs/${u.id}`);
     } catch (err) {
@@ -50,23 +58,49 @@ function NouvelAdminModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Modal
-      title="Nouvel administrateur"
+      title="Nouveau compte"
       onClose={onClose}
       footer={
         <>
           <button className="btn secondary" onClick={onClose}>Annuler</button>
-          <button className="btn" form="nouvel-admin" disabled={envoi}>{envoi ? 'Création…' : 'Créer'}</button>
+          <button className="btn" form="nouveau-compte" disabled={envoi}>{envoi ? 'Création…' : 'Créer'}</button>
         </>
       }
     >
-      <form id="nouvel-admin" onSubmit={soumettre}>
+      <form id="nouveau-compte" onSubmit={soumettre}>
         <ErrorBox error={erreur} />
+        <Field label="Type de compte">
+          <select className="select" value={champs.role} onChange={(e) => setChamps((c) => ({ ...c, role: e.target.value as NouveauCompte['role'] }))}>
+            <option value="user">Utilisateur de l’app mobile</option>
+            <option value="admin">Administrateur (back-office)</option>
+          </select>
+        </Field>
+        {!admin && (
+          <Field label="Offre">
+            <select className="select" value={champs.plan} onChange={(e) => setChamps((c) => ({ ...c, plan: e.target.value as NouveauCompte['plan'] }))}>
+              <option value="free">Gratuite (portefeuille et favoris limités)</option>
+              <option value="pro">Pro offerte</option>
+            </select>
+          </Field>
+        )}
         <Field label="E-mail">
           <input className="input" type="email" autoComplete="off" required {...champ('email')} />
         </Field>
-        <Field label="Mot de passe provisoire" hint={`${REGLE_MDP} Il devra le changer à sa première connexion.`}>
+        <Field
+          label={provisoire ? 'Mot de passe provisoire' : 'Mot de passe'}
+          hint={`${admin ? REGLE_MDP : `Au moins ${LONGUEUR_MIN} caractères.`}${provisoire ? ' Il devra le changer à sa première connexion.' : ''}`}
+        >
           <input className="input" type="text" autoComplete="new-password" required {...champ('password')} />
         </Field>
+        <label className="small" style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '4px 0 14px' }}>
+          <input
+            type="checkbox"
+            checked={provisoire}
+            disabled={admin}
+            onChange={(e) => setChamps((c) => ({ ...c, must_change_password: e.target.checked }))}
+          />
+          Exiger un nouveau mot de passe à la première connexion{admin ? ' (obligatoire pour un administrateur)' : ''}
+        </label>
         <Field label="Prénom">
           <input className="input" {...champ('first_name')} />
         </Field>
@@ -123,7 +157,7 @@ export default function UtilisateursPage() {
             <Icon name="download" size={15} /> {export_ ? 'Export…' : 'Exporter'}
           </button>
           <button className="btn" onClick={() => setCreation(true)}>
-            <Icon name="plus" size={15} /> Administrateur
+            <Icon name="plus" size={15} /> Nouveau compte
           </button>
         </div>
       </div>
@@ -160,7 +194,7 @@ export default function UtilisateursPage() {
         <Pagination info={versPagination(q.data?.pagination)} onPage={setPage} />
       </Card>
 
-      {creation && <NouvelAdminModal onClose={() => setCreation(false)} />}
+      {creation && <NouveauCompteModal onClose={() => setCreation(false)} />}
     </>
   );
 }
